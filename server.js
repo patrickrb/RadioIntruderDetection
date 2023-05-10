@@ -44,7 +44,7 @@ app.post("/data", (req, res) => {
 });
 
 app.get("/data", (req, res) => {
-  const query = "SELECT * FROM data";
+  const query = "SELECT * FROM rtl_data";
 
   db.all(query, [], (err, rows) => {
     if (err) {
@@ -57,7 +57,7 @@ app.get("/data", (req, res) => {
 
 app.get("/data/:id", (req, res) => {
   const id = req.params.id;
-  const query = "SELECT * FROM data WHERE id = ?";
+  const query = "SELECT * FROM rtl_data WHERE id = ?";
 
   db.get(query, [id], (err, row) => {
     if (err) {
