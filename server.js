@@ -4,7 +4,8 @@ const sqlite3 = require("sqlite3").verbose();
 
 // Create a new Express app
 const app = express();
-const PORT = process.env.PORT || 3000;
+const HOST = "0.0.0.0";
+const PORT = process.env.PORT || 80;
 
 // Use body-parser middleware to parse JSON request body
 app.use(bodyParser.json());
@@ -42,7 +43,38 @@ app.post("/data", (req, res) => {
   });
 });
 
+app.get("/data", (req, res) => {
+  const query = "SELECT * FROM data";
+
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: "An error occurred while fetching data." });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+app.get("/data/:id", (req, res) => {
+  const id = req.params.id;
+  const query = "SELECT * FROM data WHERE id = ?";
+
+  db.get(query, [id], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: "An error occurred while fetching data." });
+    } else if (!row) {
+      res.status(404).json({ error: "Data not found." });
+    } else {
+      res.json(row);
+    }
+  });
+});
+
+app.get("/", (req, res) => {
+  res.send("Hello world\n");
+});
+
 // Start the server
-app.listen(PORT, () => {
+app.listen(PORT, HOST, () => {
   console.log(`Server is running on port ${PORT}`);
 });
