@@ -1,5 +1,7 @@
 const express = require("express");
+const cors = require("cors");
 const bodyParser = require("body-parser");
+const jwt = require("jsonwebtoken");
 const sqlite3 = require("sqlite3").verbose();
 
 // Create a new Express app
@@ -9,6 +11,7 @@ const PORT = process.env.PORT || 80;
 
 // Use body-parser middleware to parse JSON request body
 app.use(bodyParser.json());
+app.use(cors());
 
 // Create and connect to the database
 const db = new sqlite3.Database("raddb.sql", (err) => {
@@ -41,6 +44,33 @@ app.post("/data", (req, res) => {
     console.log("Data inserted into the database");
     res.status(201).send({ message: "Data inserted into the database" });
   });
+});
+
+app.post("/login", (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  console.log("got login request: ", email, password);
+
+  if (email === "admin" && password === "admin") {
+    const user = {
+      email: email,
+      name: "Admin",
+      role: "admin",
+    };
+    // Create a token for the user.
+    // Replace 'your-secret-key' with your own secret key
+    const token = jwt.sign(
+      user,
+      process.env.JWT_TOKEN || "somesupersecretkeyformyjwttokensQ!@!@",
+      { expiresIn: "1h" }
+    );
+
+    // Send the token back to the client
+    res.json({ token });
+  } else {
+    res.status(401).send({ error: "Invalid email or password" });
+  }
 });
 
 app.get("/data", (req, res) => {
